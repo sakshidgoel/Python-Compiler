@@ -1,0 +1,144 @@
+ID equal int 
+ID equal int 
+ID equal ID plus ID plus int 
+ID equal int 
+ID equal int 
+ID equal ID mul ID 
+if special_start ID greaterthanequal ID special_end $1 : a,$2 : >=,$3 : bcolon 
+indent ID equal ID plus ID 
+indent ID equal ID mul ID mul int 
+
+ID equal int 
+ID equal int 
+
+------------------PARSE SUCCESSFUL--------------------
+
+------------Abstract Syntax Tree--------------
+( SEQ ( =  a  10 )( SEQ ( =  b  9 )( SEQ ( =  c ( + ( +  a  b ) 100 ))( SEQ ( =  e  10 )( SEQ ( =  f  8 )( SEQ ( =  d ( *  e  f ))( SEQ ( IF ( >=  a  b )( SEQ ( =  a ( +  a  b ))( SEQ ( =  g ( * ( *  e  f ) 100 )) NULL )))( SEQ ( =  u  10 )( SEQ ( =  j  99 ) NULL )))))))))
+
+------------------SYMBOL TABLE before Optimisations----------------
+-------------------------------------------------------------------
+LABEL	TYPE		VALUE	SCOPE	LINENO
+a	identifier	9	local	8
+b	identifier	9	global	2
+t0	identifier	19	-	2
+t1	identifier	119	-	3
+c	identifier	119	global	3
+e	identifier	10	global	4
+f	identifier	8	global	5
+t2	identifier	80	-	6
+d	identifier	80	global	6
+t3	identifier	0	-	6
+t4	identifier	9	-	8
+t5	identifier	80	-	8
+t6	identifier	8000	-	9
+g	identifier	8000	local	9
+u	identifier	10	local	11
+j	identifier	99	local	12
+
+-------------ICG without optimisation-------------
+a=10
+b=9
+t0=a+b
+t1=t0+100
+c=t1
+e=10
+f=8
+t2=e*f
+d=t2
+l0 : t3=a>=b
+if not t3 goto l1
+t4=a+b
+a=t4
+t5=e*f
+t6=t5*100
+g=t6
+l1 : u=10
+j=99
+
+
+------------------SYMBOL TABLE after Optimisations----------------
+------------------------------------------------------------------
+LABEL	TYPE		VALUE	SCOPE	LINENO
+a	identifier	19	local	0
+b	identifier	9	global	0
+t0	identifier	19	-	0
+t1	identifier	119	-	0
+c	identifier	119	global	0
+e	identifier	10	global	0
+f	identifier	8	global	0
+t2	identifier	80	-	0
+d	identifier	80	global	0
+t3	identifier	1	-	0
+t4	identifier	0	-	0
+t5	identifier	8000	-	0
+g	identifier	8000	local	0
+u	identifier	10	local	0
+j	identifier	99	local	0
+
+------------QUADRUPLES--------------
+	op	arg1	arg2	result
+	=	10		a
+	=	9		b
+	+	a	b	t0
+	+	t0	100	t1
+	=	t1		c
+	=	10		e
+	=	8		f
+	*	e	f	t2
+	=	t2		d
+	Label			l0
+	>=	a	b	t3
+	goto			l1
+	=	t0		a
+	*	t2	100	t5
+	=	t5		g
+	Label			l1
+	=	10		u
+	=	99		j
+
+
+-------------ICG with optimisations(Packing temporaries & Constant Propagation)-------------
+a = 10
+b = 9
+t0 = 10 + 9 
+t1 = 19 + 100 
+c = 119
+e = 10
+f = 8
+t2 = 10 * 8 
+d = 80
+l0:
+t3 = 10 >= 9 
+t4 = not 1
+if 0 goto l1
+a = 19
+t5 = 80 * 100 
+g = 8000
+l1:
+u = 10
+j = 99
+
+
+-------------TARGET CODE-------------
+MOV R0, #10
+MOV R1, #9
+MOV R2, #119
+MOV R3, #8
+MOV R4, #80
+l0:
+MOV R5, #0
+BNEZ R5, l1
+MOV R6, #19
+MOV R7, #8000
+l1:
+MOV R8, #99
+ST b, R1
+ST c, R2
+ST e, R0
+ST f, R3
+ST d, R4
+ST a, R6
+ST g, R7
+ST u, R0
+ST j, R8
