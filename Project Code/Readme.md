@@ -3,7 +3,7 @@
 + **Project Title:** Python Compiler (constructs: 'if-else', 'while') 
 	       - Using C language till Optimisation of Intermediate Code.
 	       - Using Python Language for Target Code Generation.
-+ **Team Members: **
++ **Team Members:**
    1) Sakshi Goel(PES1201700148)
    2) Amogh Rajesh Desai(PES1201700180)
    3) Tanvi PK(PES1201700646)
